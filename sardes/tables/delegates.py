@@ -10,7 +10,8 @@
 # ---- Third party imports
 import pandas as pd
 from qtpy.QtWidgets import (
-    QComboBox, QDateTimeEdit, QTextEdit, QSpinBox, QLineEdit, QDoubleSpinBox)
+    QComboBox, QDateEdit, QDateTimeEdit, QTextEdit, QSpinBox, QLineEdit,
+    QDoubleSpinBox)
 
 # ---- Local imports
 from sardes.config.locale import _
@@ -230,40 +231,23 @@ class BoolEditDelegate(SardesItemDelegate):
             )
 
 
-class ListEditDelegate(SardesItemDelegate):
+class TriStateEditDelegate(SardesItemDelegate):
     """
-    A delegate where you can chose between a fixed list of values.
-
-    A dictionary mapping each possible physical value to their logical
-    value must be provided.
+    A delegate where you can chose between three states: No, Yes, and NA.
     """
-
-    def __init__(self, model_view, table_column, mapping: dict):
-        super() .__init__(model_view, table_column)
-        self.mapping = mapping
 
     def create_editor(self, parent):
         editor = QComboBox(parent)
-        for physical, logical in self.mapping.items():
-            editor.addItem(logical, userData=physical)
+        editor.addItem(_('No'), userData=0)
+        editor.addItem(_('Yes'), userData=1)
+        editor.addItem(_('NA'), userData=2)
         return editor
 
     def logical_to_visual_data(self, visual_dataf):
         visual_dataf[self.table_column.name] = (
             visual_dataf[self.table_column.name]
-            .map(self.mapping.get)
+            .map({1: _('Yes'), 0: _('No'), 2: _('NA')}.get)
             )
-
-
-class TriStateEditDelegate(ListEditDelegate):
-    """
-    A delegate where you can chose between three states: No, Yes, and NA.
-    """
-
-    def __init__(self, model_view, table_column):
-        super() .__init__(
-            model_view, table_column,
-            mapping={1: _('Yes'), 0: _('No'), 2: _('NA')})
 
 
 # =============================================================================
